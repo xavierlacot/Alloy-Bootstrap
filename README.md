@@ -1,7 +1,7 @@
 # Alloy Bootstrap
 
 
-This is an alloy bootstrap with
+This is a Titanium Alloy bootstrap application with
  * [CoffeeScript](http://coffeescript.org/) is an attempt to expose the good parts of JavaScript in a simple way
  * [LTSS](https://github.com/dbankier/ltss) an Alloy tss pre-processor inspired by less
  * [TiCons](https://github.com/fokkezb/ticons-cli) to generate icons and splash screens
@@ -11,7 +11,13 @@ This is an alloy bootstrap with
 
 ## Prerequisites
 
- * Do this:
+First, this fork requires [a fork of Alloy which implements a faster Alloy selective compilation](https://github.com/xavierlacot/alloy/tree/feature/speedup-compile). Install it with:
+
+```
+npm install -g xavierlacot/alloy#feature/speedup-compile
+```
+Then, go on with this bootstrap's dependencies:
+
 ```
  [sudo] npm install alloy tishadow grunt-cli
 ```
@@ -21,6 +27,14 @@ This is an alloy bootstrap with
 ```
  * [Get started](https://github.com/fokkezb/ticons-cli) with TiCons
 
+
+## Rollbacking
+
+Should you have any problem with the Alloy fork, you can rollback to the latest stable of Alloy using:
+
+```
+npm install -g alloy
+```
 
 ## Installation
 
