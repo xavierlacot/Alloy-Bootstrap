@@ -2,6 +2,7 @@
 .DS_Store
 
 # build stuff
+app
 build.log
 build
 dist
@@ -10,13 +11,9 @@ Resources
 tmp
 
 # generated sourcecode files
-app/alloy.js
-app/controllers
-app/lib
-app/styles
 *.js.map
 
-#spec
+# spec generated files
 spec/**/*.js
 spec/**/*.js.map
 
@@ -30,7 +27,7 @@ npm-debug.log
 .settings
 
 # project config
-app/config.json
+src/config.json
 
 # assets
 GooglePlay.png

@@ -1,16 +1,27 @@
 module.exports = function(grunt) {
     grunt.initConfig({
+        alloy: {
+            android: {
+                options: {
+                    command:  'compile',
+                    noColors: false,
+                    config: 'platform=android'
+                }
+            },
+
+            ios: {
+                options: {
+                    command:  'compile',
+                    noColors: false,
+                    config: 'platform=ios'
+                }
+            }
+        },
+
         clean: {
             project: {
                 src: [
-                    "app/alloy.js",
-                    "app/alloy.js.map",
-                    "app/coffee/**/*.js",
-                    "app/coffee/**/*.js.map",
-                    "app/controllers/**",
-                    "app/controllers/**",
-                    "app/lib/**",
-                    "app/styles/**",
+                    "app/",
                     "build/",
                     "Resources/"
                 ]
@@ -32,6 +43,7 @@ module.exports = function(grunt) {
                 ]
             }
         },
+
         coffee: {
             options: {
                 bare: true,
@@ -41,23 +53,51 @@ module.exports = function(grunt) {
                 files: [{
                     expand: true,
                     src: ["**/*.coffee"],
+                    cwd: "src/",
                     dest: "app/",
-                    cwd: "app/coffee",
                     ext: ".js"
                 }]
             }
         },
+
+        concurrent: {
+            options: {
+                logConcurrentOutput: true
+            },
+            all: {
+                tasks: ['watch:precompile', 'watch:copy', 'watch:alloy_ios', 'watch:alloy_android', 'watch:ti_all']
+            },
+            ios: {
+                tasks: ['watch:precompile', 'watch:copy', 'watch:alloy_ios', 'watch:ti_ios']
+            },
+            android: {
+                tasks: ['watch:precompile', 'watch:copy', 'watch:alloy_android', 'watch:ti_android']
+            }
+        },
+
+        copy: {
+            dist: {
+                files: [{
+                    expand: true,
+                    src: ["**/*.!(coffee|ltss)"],
+                    cwd: 'src/',
+                    dest: 'app/'
+                }]
+            }
+        },
+
         ltss: {
             compile: {
                 files: [{
                     expand: true,
-                    cwd: 'app/ltss',
                     src: ['**/*.ltss','!**/includes/**'],
+                    cwd: 'src/styles',
                     dest: 'app/styles',
                     ext: '.tss'
                 }]
             }
         },
+
         shell: {
             options: {
                 stdout: true,
@@ -85,28 +125,32 @@ module.exports = function(grunt) {
                 command: "ticons -a assets"
             }
         },
+
         tishadow: {
             options: {
-                update: true,
+                update: false,
             },
             run_android: {
                 command: 'run',
                 options: {
                     locale: 'en',
-                    platform: 'android'
+                    platform: 'android',
+                    skipAlloyCompile: true
                 }
             },
             run_ios:{
                 command: 'run',
                 options: {
                     locale: 'en',
-                    platform: 'ios'
+                    platform: 'ios',
+                    skipAlloyCompile: true
                 }
             },
             run: {
                 command: 'run',
                 options: {
                     locale: 'en',
+                    skipAlloyCompile: true
                 }
             },
             spec_android: {
@@ -128,23 +172,44 @@ module.exports = function(grunt) {
                 options: {}
             }
         },
+
         watch: {
             options: {
-                nospawn: false
+                spawn: false
             },
-            ios: {
-                files: ["tiapp.xml", "i18n/**", "app/config.json", "app/**/*.xml", "app/**/*.ltss", "app/coffee/**/*.coffee", "app/widgets/**/*.js", "app/widgets/**/*.tss", "app/widgets/**/*.xml"],
-                tasks: ['build','tishadow:run_ios']
+
+            copy: {
+                files: ["src/**/*.xml", "src/**/*.tss", "src/**/*.js"],
+                tasks: ['copy']
             },
-            android: {
-                files: ["tiapp.xml", "i18n/**", "app/config.json", "app/**/*.xml", "app/**/*.ltss", "app/coffee/**/*.coffee", "app/widgets/**/*.js", "app/widgets/**/*.tss", "app/widgets/**/*.xml"],
-                tasks: ['build','tishadow:run_android']
+            precompile: {
+                files: ["src/**/*.ltss", "src/**/*.coffee"],
+                tasks: ['build']
             },
-            all: {
-                files: ["tiapp.xml", "i18n/**", "app/config.json", "app/**/*.xml", "app/**/*.ltss", "app/coffee/**/*.coffee", "app/widgets/**/*.js", "app/widgets/**/*.tss", "app/widgets/**/*.xml"],
-                tasks: ['build','tishadow:run']
+
+            alloy_ios: {
+                files: ["app/config.json", "app/**/*.js", "app/**/*.xml", "app/**/*.tss", "app/widgets/**/*.js", "app/widgets/**/*.tss", "app/widgets/**/*.xml"],
+                tasks: ['alloy:ios']
+            },
+            ti_ios: {
+                files: ["tiapp.xml", "i18n/**", "Resources/**"],
+                tasks: ['tishadow:run_ios']
+            },
+
+            alloy_android: {
+                files: ["app/config.json", "app/**/*.js", "app/**/*.xml", "app/**/*.tss", "app/widgets/**/*.js", "app/widgets/**/*.tss", "app/widgets/**/*.xml"],
+                tasks: ['alloy:android']
+            },
+            ti_android: {
+                files: ["tiapp.xml", "i18n/**", "Resources/**"],
+                tasks: ['tishadow:run_android']
+            },
+
+            ti_all: {
+                files: ["tiapp.xml", "i18n/**", "Resources/**"],
+                tasks: ['tishadow:run']
             }
-        },
+        }
     });
 
     require('matchdep').filterDev('grunt-*').forEach(grunt.loadNpmTasks);
@@ -153,9 +218,9 @@ module.exports = function(grunt) {
     grunt.registerTask('build', ['coffee', 'ltss']);
     grunt.registerTask('ticons', ['shell:icons', 'shell:splashes', 'shell:assets']);
 
-    grunt.registerTask('dev_ios', ['build','tishadow:run_ios','watch:ios']);
-    grunt.registerTask('dev_android', ['build','tishadow:run_android','watch:android']);
-    grunt.registerTask('dev_all', ['build','tishadow:run','watch:all']);
+    grunt.registerTask('dev_ios', ['build', 'copy', 'alloy:ios', 'tishadow:run_ios', 'concurrent:ios']);
+    grunt.registerTask('dev_android', ['build', 'copy', 'alloy:android', 'tishadow:run_android', 'concurrent:android']);
+    grunt.registerTask('dev_all', ['build', 'copy', 'alloy:android', 'alloy:ios', 'tishadow:run', 'concurrent:all']);
 
     // titanium cli tasks
     ['iphone6','iphone7','ipad6','ipad7','appstore','adhoc','playstore'].forEach(function(target) {
@@ -163,11 +228,30 @@ module.exports = function(grunt) {
     });
 
     // only modify changed file
-    grunt.event.on('watch', function(action, filepath) {
-        var o = {};
-        if (filepath.match(/.ltss$/) && filepath.indexOf("includes") === -1){
-            o[filepath.replace(".ltss",".tss")] = [filepath];
-            grunt.config.set(['ltss', 'compile', 'files'],o);
+    grunt.event.on('watch', function(action, filepath, target) {
+        var newPath, o;
+        o = {};
+
+        if (filepath.indexOf('app/') === 0) {
+            // restricts alloy compilation to changed files only
+            grunt.config.set('alloy.ios.options.config', 'platform=ios,file=' + filepath);
+            grunt.config.set('alloy.android.options.config', 'platform=android,file=' + filepath);
+        } else if (filepath.indexOf('src/') === 0) {
+            newPath = filepath.replace('src/', 'app/');
+            if (filepath.match(/.coffee$/)) {
+                newPath = newPath.replace('.coffee', '.js');
+                o[newPath] = [filepath];
+                grunt.config.set(["coffee", "compile", "files"], o);
+                grunt.config.set(["ltss", "compile", "files"], []);
+            } else if (filepath.match(/.ltss$/)) {
+                newPath = newPath.replace('.ltss', '.tss');
+                o[newPath] = [filepath];
+                grunt.config.set(["ltss", "compile", "files"], o);
+                return grunt.config.set(["coffee", "compile", "files"], []);
+            } else {
+                o[newPath] = [filepath];
+                return grunt.config.set(["copy", "dist", "files"], o);
+            }
         }
     });
 };
