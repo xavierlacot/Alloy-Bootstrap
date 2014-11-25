@@ -14,16 +14,16 @@ This is a Titanium Alloy bootstrap application with
 First, this fork requires [a fork of Alloy which implements a faster Alloy selective compilation](https://github.com/xavierlacot/alloy/tree/feature/speedup-compile). Install it with:
 
 ```
-npm install -g xavierlacot/alloy#feature/speedup-compile
+$ npm install -g xavierlacot/alloy#feature/speedup-compile
 ```
 Then, go on with this bootstrap's dependencies:
 
 ```
- [sudo] npm install alloy tishadow grunt-cli
+$ npm install alloy tishadow grunt-cli
 ```
  * [Get started](http://tishadow.yydigital.com/getting%20started) with TiShadow
 ```
- [sudo] npm install -g ticons
+$ npm install -g ticons
 ```
  * [Get started](https://github.com/fokkezb/ticons-cli) with TiCons
 
@@ -33,7 +33,7 @@ Then, go on with this bootstrap's dependencies:
 Should you have any problem with the Alloy fork, you can rollback to the latest stable of Alloy using:
 
 ```
-npm install -g alloy
+$ npm install -g alloy
 ```
 
 ## Installation
