@@ -19,7 +19,7 @@ $ npm install -g xavierlacot/alloy#feature/speedup-compile
 Then, go on with this bootstrap's dependencies:
 
 ```
-$ npm install alloy tishadow grunt-cli
+$ npm install tishadow grunt-cli
 ```
  * [Get started](http://tishadow.yydigital.com/getting%20started) with TiShadow
 ```
